@@ -1,11 +1,10 @@
-
-name = " debtchecknow"
+name = "debtchecknow"
 main = "worker/index.js"
 compatibility_date = "2024-12-01"
 
 [[kv_namespaces]]
 binding = "DEBT_QUEUE"
-id = "DEBT_QUEUE"
+id = "abc123def456"
 
 [triggers]
 crons = ["0 13 * * 1-5"]
