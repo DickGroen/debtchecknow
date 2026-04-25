@@ -3,9 +3,9 @@ name = "debtcheck"
 main = "worker/index.js"
 compatibility_date = "2024-12-01"
 
-[[DEBT_QUEUE]]
+[[kv_namespaces]]
 binding = "DEBT_QUEUE"
-id = "DEBT_QUEUE"
+id = "JOUW_ID_HIER""
 
 [triggers]
 crons = ["0 13 * * 1-5"]
