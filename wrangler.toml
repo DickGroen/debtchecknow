@@ -3,9 +3,9 @@ name = "debtcheck"
 main = "worker/index.js"
 compatibility_date = "2024-12-01"
 
-[[kv_namespaces]]
+[[DEBT_QUEUE]]
 binding = "DEBT_QUEUE"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "DEBT_QUEUE"
 
 [triggers]
 crons = ["0 13 * * 1-5"]
