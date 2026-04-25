@@ -1,1 +1,298 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment successful &mdash; Upload your letter | DebtCheck</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .thankyou-wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 140px; }
+    .thankyou-card { background: var(--white); border: 1.5px solid var(--line); border-radius: 16px; padding: 36px 28px; box-shadow: 0 10px 24px rgba(17,24,39,0.06); }
+    .thankyou-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--green-soft); color: var(--green); border-radius: 100px; padding: 6px 14px; font-size: 0.78rem; font-weight: 700; margin-bottom: 18px; }
+    .thankyou-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; }
+    .progress-bar { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); margin-bottom: 18px; }
+    .progress-bar__step--done { color: var(--green); font-weight: 700; }
+    .progress-bar__step--current { color: var(--accent); font-weight: 700; }
+    .progress-bar__divider { width: 24px; height: 1px; background: var(--line); }
+    .thankyou-title { font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 12px; color: var(--ink); line-height: 1.25; }
+    .thankyou-sub { font-size: 1rem; color: var(--ink-3); line-height: 1.75; margin-bottom: 28px; }
+    .thankyou-sub strong { color: var(--ink); background: var(--amber-soft); padding: 2px 6px; border-radius: 4px; }
+    .thankyou-steps { display: grid; gap: 14px; margin-bottom: 30px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 8px; }
+    .thankyou-step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+    .thankyou-step-num { width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 700; }
+    .thankyou-step-title { font-weight: 700; color: var(--ink); font-size: 0.95rem; margin-bottom: 2px; }
+    .thankyou-step-desc { color: var(--muted); font-size: 0.86rem; line-height: 1.7; }
+    .form-grid { display: grid; gap: 16px; margin-bottom: 18px; }
+    .field label { display: block; font-size: 0.84rem; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .field input { width: 100%; border: 1.5px solid var(--line); border-radius: 10px; padding: 14px 15px; font-size: 0.95rem; color: var(--ink); background: var(--white); outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+    .field input:focus { border-color: var(--accent-2); }
+    .field input.invalid { border-color: var(--red); }
+    .field-error { display: none; color: var(--red); font-size: 0.78rem; margin-top: 6px; font-weight: 600; }
+    .field-error.show { display: block; }
+    .upload-panel { background: var(--surface); border: 1.5px dashed var(--line); border-radius: 12px; padding: 28px 22px; text-align: center; margin-bottom: 12px; cursor: pointer; display: block; transition: border-color 0.2s, background 0.2s; }
+    .upload-panel:hover, .upload-panel.drag-over { border-color: var(--accent-2); background: var(--accent-soft); }
+    .upload-panel__icon { width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--white); display: flex; align-items: center; justify-content: center; }
+    .upload-panel__title { font-weight: 700; font-size: 1rem; color: var(--ink); margin-bottom: 6px; }
+    .upload-panel__sub { font-size: 0.84rem; color: var(--muted); }
+    .upload-security { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.76rem; color: var(--muted); margin-bottom: 18px; }
+    #real-file-input { display: none; }
+    .selected-file { display: none; background: var(--green-soft); color: var(--green); border: 1px solid #b7e4c7; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+    .selected-file.show { display: flex; align-items: center; gap: 12px; }
+    .selected-file__check { width: 24px; height: 24px; flex-shrink: 0; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+    .selected-file__name { font-weight: 700; font-size: 0.9rem; }
+    .selected-file__meta { font-size: 0.78rem; opacity: 0.8; margin-top: 2px; }
+    .selected-file__remove { margin-left: auto; background: none; border: none; color: var(--green); cursor: pointer; font-size: 0.82rem; font-weight: 700; text-decoration: underline; }
+    .cta-main { width: 100%; padding: 16px; font-size: 1rem; font-weight: 700; }
+    .cta-sub-note { text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
+    .status-box { display: none; border-radius: 10px; padding: 13px 15px; font-size: 0.86rem; font-weight: 600; margin-top: 14px; line-height: 1.6; }
+    .status-box.success { display: block; background: var(--green-soft); color: var(--green); border: 1px solid #b7e4c7; }
+    .status-box.error { display: block; background: var(--red-soft); color: var(--red); border: 1px solid #f5b7b1; }
+    .status-box.info { display: block; background: var(--amber-soft); color: var(--amber); border: 1px solid #f6d58a; }
+    .fallback-box { margin-top: 28px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .fallback-box strong { display: block; margin-bottom: 6px; color: var(--ink); font-size: 0.9rem; }
+    .fallback-box p { color: var(--muted); font-size: 0.83rem; line-height: 1.7; margin: 0; }
+    .fallback-email { font-weight: 700; font-size: 0.98rem; color: var(--accent); margin-top: 6px; display: inline-block; }
+    .locked-screen { max-width: 700px; margin: 0 auto; padding: 80px 24px; text-align: center; }
+    .locked-screen p { color: var(--muted); line-height: 1.7; }
+    .locked-screen a { display: inline-block; margin-top: 16px; color: var(--accent); font-weight: 700; }
+    .success-screen { text-align: center; padding: 20px 0; }
+    .success-screen__icon { width: 64px; height: 64px; margin: 0 auto 18px; border-radius: 50%; background: var(--green-soft); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; }
+    .success-screen h2 { color: var(--ink); margin-bottom: 10px; }
+    .success-screen p { color: var(--ink-3); line-height: 1.7; max-width: 480px; margin: 0 auto 18px; }
+    .success-screen__meta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; font-size: 0.85rem; color: var(--muted); max-width: 480px; margin: 0 auto; }
+    .success-screen__meta strong { color: var(--ink); }
+    @media (max-width: 600px) { .thankyou-wrap { padding: 32px 16px 120px; } .thankyou-card { padding: 24px 18px; } }
+  </style>
+</head>
+<body>
+
+  <div id="locked-screen" class="locked-screen" style="display:none;">
+    <h2>No access to this page</h2>
+    <p>This page is only accessible after a successful payment. Please return to the home page.</p>
+    <a href="/">Back to home</a>
+  </div>
+
+  <div id="thankyou-app" class="thankyou-wrap" style="display:none;">
+    <div class="thankyou-card">
+
+      <div class="thankyou-badge"><span class="thankyou-dot"></span>Payment successful</div>
+
+      <div class="progress-bar">
+        <span class="progress-bar__step progress-bar__step--done">&#10003; Paid</span>
+        <span class="progress-bar__divider"></span>
+        <span class="progress-bar__step progress-bar__step--current">Step 2: Upload your letter</span>
+      </div>
+
+      <h1 class="thankyou-title">Last step &mdash; upload your debt letter now</h1>
+
+      <p class="thankyou-sub">
+        Once uploaded, we&rsquo;ll start your analysis immediately. You&rsquo;ll receive your full analysis
+        and the ready-to-send dispute letter <strong>within 24 hours</strong> by email.
+      </p>
+
+      <div class="thankyou-steps">
+        <div class="thankyou-step">
+          <div class="thankyou-step-num">1</div>
+          <div>
+            <div class="thankyou-step-title">Upload your letter</div>
+            <div class="thankyou-step-desc">Debt collection letter, demand notice or solicitor&rsquo;s letter &mdash; PDF, JPG or PNG, as complete and legible as possible.</div>
+          </div>
+        </div>
+        <div class="thankyou-step">
+          <div class="thankyou-step-num">2</div>
+          <div>
+            <div class="thankyou-step-title">We analyse your letter</div>
+            <div class="thankyou-step-desc">We check for statute of limitations, excessive fees, invalid assignment, missing proof of debt and regulatory compliance.</div>
+          </div>
+        </div>
+        <div class="thankyou-step">
+          <div class="thankyou-step-num">3</div>
+          <div>
+            <div class="thankyou-step-title">Result by email</div>
+            <div class="thankyou-step-desc">You&rsquo;ll receive your full analysis and the ready-to-send dispute letter <strong>within 24 hours</strong>.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="customer-name">Your name</label>
+          <input type="text" id="customer-name" placeholder="Full name" autocomplete="name">
+          <div class="field-error" id="name-error">Please enter your name.</div>
+        </div>
+        <div class="field">
+          <label for="customer-email">Email address for your results</label>
+          <input type="email" id="customer-email" placeholder="name@example.com" autocomplete="email">
+          <div class="field-error" id="email-error">Please enter a valid email address.</div>
+        </div>
+      </div>
+
+      <label class="upload-panel" id="upload-panel" for="real-file-input">
+        <input type="file" id="real-file-input" accept=".pdf,.jpg,.jpeg,.png">
+        <div class="upload-panel__icon">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#6B7A90" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="upload-panel__title">Click or drag file here</div>
+        <div class="upload-panel__sub">PDF, JPG or PNG &middot; max 8 MB</div>
+      </label>
+
+      <div class="upload-security">&#128274; Secure SSL connection &middot; Document deleted after analysis</div>
+
+      <div class="selected-file" id="selected-file">
+        <div class="selected-file__check">&#10003;</div>
+        <div>
+          <div class="selected-file__name" id="selected-file-name"></div>
+          <div class="selected-file__meta" id="selected-file-meta"></div>
+        </div>
+        <button type="button" class="selected-file__remove" id="remove-file">remove</button>
+      </div>
+
+      <button class="cta-main" id="submit-btn" type="button" disabled>Choose a file first</button>
+      <div class="cta-sub-note">After upload we start immediately &mdash; result within 24 hours in your inbox.</div>
+      <div class="status-box" id="status-box"></div>
+
+      <div class="fallback-box">
+        <strong>Upload not working?</strong>
+        <p>Send your letter directly to us by email &mdash; we&rsquo;ll process it just as quickly. Please include your name and the email address used to pay.</p>
+        <a href="mailto:info@debtcheck.co.uk" class="fallback-email">info@debtcheck.co.uk</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SUBMIT_URL = 'https://debtcheck.dickgroen2.workers.dev/submit';
+    const lockedScreen = document.getElementById('locked-screen');
+    const thankyouApp = document.getElementById('thankyou-app');
+    const uploadPanel = document.getElementById('upload-panel');
+    const fileInput = document.getElementById('real-file-input');
+    const selectedFileBox = document.getElementById('selected-file');
+    const selectedFileName = document.getElementById('selected-file-name');
+    const selectedFileMeta = document.getElementById('selected-file-meta');
+    const removeFileBtn = document.getElementById('remove-file');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusBox = document.getElementById('status-box');
+    const nameInput = document.getElementById('customer-name');
+    const emailInput = document.getElementById('customer-email');
+    const nameError = document.getElementById('name-error');
+    const emailError = document.getElementById('email-error');
+    let selectedFile = null;
+
+    validateSession();
+
+    function validateSession() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+      if (sessionId && (sessionId.startsWith('cs_live_') || sessionId.startsWith('cs_test_'))) {
+        thankyouApp.style.display = 'block';
+        const emailFromStripe = params.get('email');
+        if (emailFromStripe) emailInput.value = emailFromStripe;
+      } else {
+        lockedScreen.style.display = 'block';
+      }
+    }
+
+    function showStatus(message, type) { statusBox.className = 'status-box ' + type; statusBox.innerHTML = message; }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function updateSelectedFile(file) {
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) { showStatus('File too large. Maximum 8 MB.', 'error'); return; }
+      selectedFile = file;
+      selectedFileBox.classList.add('show');
+      selectedFileName.textContent = file.name;
+      selectedFileMeta.textContent = formatFileSize(file.size) + ' \xB7 ready to upload';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Upload now and start analysis';
+      statusBox.className = 'status-box';
+    }
+
+    function clearFile() {
+      selectedFile = null; fileInput.value = '';
+      selectedFileBox.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Choose a file first';
+    }
+
+    removeFileBtn.addEventListener('click', e => { e.preventDefault(); clearFile(); });
+    fileInput.addEventListener('change', () => { if (fileInput.files && fileInput.files[0]) updateSelectedFile(fileInput.files[0]); });
+    uploadPanel.addEventListener('dragover', e => { e.preventDefault(); uploadPanel.classList.add('drag-over'); });
+    uploadPanel.addEventListener('dragleave', () => uploadPanel.classList.remove('drag-over'));
+    uploadPanel.addEventListener('drop', e => {
+      e.preventDefault(); uploadPanel.classList.remove('drag-over');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; updateSelectedFile(e.dataTransfer.files[0]); }
+    });
+
+    nameInput.addEventListener('blur', () => {
+      if (!nameInput.value.trim()) { nameInput.classList.add('invalid'); nameError.classList.add('show'); }
+      else { nameInput.classList.remove('invalid'); nameError.classList.remove('show'); }
+    });
+    emailInput.addEventListener('blur', () => {
+      const val = emailInput.value.trim();
+      if (!val || !val.includes('@') || !val.includes('.')) { emailInput.classList.add('invalid'); emailError.classList.add('show'); }
+      else { emailInput.classList.remove('invalid'); emailError.classList.remove('show'); }
+    });
+
+    submitBtn.addEventListener('click', startUpload);
+
+    async function startUpload() {
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+      const file = fileInput.files[0] || selectedFile;
+
+      let valid = true;
+      if (!name) { nameInput.classList.add('invalid'); nameError.classList.add('show'); valid = false; }
+      if (!email || !email.includes('@') || !email.includes('.')) { emailInput.classList.add('invalid'); emailError.classList.add('show'); valid = false; }
+      if (!file) { showStatus('Please choose a file first.', 'error'); valid = false; }
+      if (!valid) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+      showStatus('Your letter is being securely uploaded. Please wait...', 'info');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('session_id', sessionId || '');
+
+      try {
+        const res = await fetch(SUBMIT_URL, { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.ok) {
+          document.querySelector('.thankyou-card').innerHTML =
+            '<div class="success-screen">' +
+            '<div class="success-screen__icon">&#10003;</div>' +
+            '<h2>Upload successful!</h2>' +
+            '<p>Your letter has been securely received. We\'re starting your analysis now.</p>' +
+            '<div class="success-screen__meta">' +
+            'You\'ll receive your full analysis and the ready-to-send dispute letter ' +
+            '<strong>within 24 hours</strong> at <strong>' + email + '</strong>.' +
+            '<br><br>Please check your spam folder too.' +
+            '</div></div>';
+        } else {
+          showStatus('Upload failed: ' + (data.error || 'Unknown error') + '. Please try again or email info@debtcheck.co.uk', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Upload now and start analysis';
+        }
+      } catch (err) {
+        showStatus('Technical error. Please try again or email info@debtcheck.co.uk', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Upload now and start analysis';
+      }
+    }
+  </script>
+</body>
+</html>
